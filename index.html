@@ -21,8 +21,10 @@
         
         <div class="converter-box">
             <div class="file-input">
+                <div class="drag-icon">📁</div>
                 <input type="file" id="inputFile" class="hidden">
                 <label for="inputFile" class="upload-btn">Choose File to Transform</label>
+                <p class="upload-text">or drag and drop your file here</p>
                 <span id="fileName">No file selected</span>
             </div>
 
@@ -53,5 +55,16 @@
         <p class="footer-text">Made with ❤️ by <a href="https://officiallysp.net">OfficiallySp</a></p>
     </div>
     <script src="converter.js"></script>
+    <style>
+    .drop-ripple {
+        position: fixed;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);
+        pointer-events: none;
+        transform-origin: center;
+    }
+    </style>
 </body>
 </html> 

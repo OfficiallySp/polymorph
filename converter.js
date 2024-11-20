@@ -7,6 +7,7 @@ class Polymorph {
         this.status = document.getElementById('status');
         this.selectedFormat = null;
         this.loadingText = document.getElementById('loadingLibraries');
+        this.converterBox = document.querySelector('.converter-box');
         
         this.supportedConversions = {
             'image/jpeg': ['image/png', 'image/webp', 'image/gif'],
@@ -36,6 +37,7 @@ class Polymorph {
         this.initializeEventListeners();
         this.loadLibraries();
         this.createAllFormatButtons();
+        this.initializeDragAndDrop();
     }
 
     initializeEventListeners() {
@@ -329,6 +331,92 @@ class Polymorph {
         });
         
         return button;
+    }
+
+    initializeDragAndDrop() {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            this.converterBox.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+            document.body.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            this.converterBox.addEventListener(eventName, () => {
+                this.converterBox.classList.add('drag-over');
+                gsap.to('.drag-icon', {
+                    scale: 1.2,
+                    duration: 0.3,
+                    ease: 'back.out'
+                });
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            this.converterBox.addEventListener(eventName, () => {
+                this.converterBox.classList.remove('drag-over');
+                gsap.to('.drag-icon', {
+                    scale: 1,
+                    duration: 0.3,
+                    ease: 'back.out'
+                });
+            });
+        });
+
+        this.converterBox.addEventListener('drop', (e) => {
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                this.inputFile.files = e.dataTransfer.files;
+                this.handleFileSelect({ target: { files: [file] } });
+                
+                // Add drop animation
+                const dropPoint = {
+                    x: e.clientX,
+                    y: e.clientY
+                };
+                
+                this.createDropAnimation(dropPoint);
+            }
+        });
+    }
+
+    createDropAnimation(point) {
+        // Create ripple effect
+        const ripple = document.createElement('div');
+        ripple.className = 'drop-ripple';
+        document.body.appendChild(ripple);
+        
+        const rect = this.converterBox.getBoundingClientRect();
+        const x = point.x - rect.left;
+        const y = point.y - rect.top;
+        
+        gsap.set(ripple, {
+            x: point.x,
+            y: point.y,
+            scale: 0,
+            opacity: 1
+        });
+        
+        gsap.to(ripple, {
+            scale: 1,
+            opacity: 0,
+            duration: 0.6,
+            ease: 'power2.out',
+            onComplete: () => ripple.remove()
+        });
+
+        // Animate converter box
+        gsap.to(this.converterBox, {
+            scale: 1.05,
+            duration: 0.15,
+            ease: 'power2.out',
+            yoyo: true,
+            repeat: 1
+        });
     }
 }
 

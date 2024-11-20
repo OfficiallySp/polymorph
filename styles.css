@@ -68,20 +68,32 @@ h1 {
 .converter-box {
     margin: 3rem 0;
     position: relative;
+    min-height: 200px;
+    border: 2px dashed var(--border-color);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    padding: 2rem;
+}
+
+.converter-box.drag-over {
+    border-color: var(--primary-color);
+    background: rgba(0, 255, 157, 0.05);
+    transform: scale(1.02);
 }
 
 .converter-box::before {
     content: '';
     position: absolute;
-    top: -10px;
-    left: -10px;
-    right: -10px;
-    bottom: -10px;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
     border-radius: 20px;
     background: linear-gradient(45deg, var(--primary-color), transparent);
     opacity: 0.1;
     filter: blur(20px);
     animation: glowPulse 4s infinite;
+    z-index: -1;
 }
 
 @keyframes glowPulse {
@@ -91,9 +103,27 @@ h1 {
 }
 
 .file-input {
-    margin-bottom: 1.5rem;
-    position: relative;
-    z-index: 1;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.upload-text {
+    color: var(--text-secondary);
+    margin: 1rem 0;
+    font-size: 0.9rem;
+}
+
+.drag-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.converter-box.drag-over .drag-icon {
+    opacity: 1;
+    transform: scale(1.1);
 }
 
 .upload-btn {
