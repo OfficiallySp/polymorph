@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polymorph - Offline File Converter</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div class="container">
+        <h1>Polymorph</h1>
+        <p class="subtitle">Offline File Converter</p>
+        
+        <div class="converter-box">
+            <div class="file-input">
+                <input type="file" id="inputFile" class="hidden">
+                <label for="inputFile" class="upload-btn">Choose File</label>
+                <span id="fileName">No file selected</span>
+            </div>
+
+            <div class="conversion-options">
+                <select id="outputFormat" disabled>
+                    <option value="">Select output format...</option>
+                </select>
+            </div>
+
+            <button id="convertBtn" disabled>Convert</button>
+        </div>
+
+        <div id="status" class="status"></div>
+    </div>
+    <script src="converter.js"></script>
+</body>
+</html> 
