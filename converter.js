@@ -24,8 +24,17 @@ class Polymorph {
             'audio/ogg': ['audio/mpeg', 'audio/wav']
         };
 
+        this.allFormats = new Set();
+        Object.values(this.supportedConversions).forEach(formats => {
+            formats.forEach(format => this.allFormats.add(format));
+        });
+        Object.keys(this.supportedConversions).forEach(format => {
+            this.allFormats.add(format);
+        });
+
         this.initializeEventListeners();
         this.loadLibraries();
+        this.createAllFormatButtons();
     }
 
     initializeEventListeners() {
@@ -38,35 +47,78 @@ class Polymorph {
         if (!file) return;
 
         this.fileName.textContent = file.name;
-        this.updateOutputFormats(file.type);
-        this.formatButtons.disabled = false;
+        this.updateAvailableFormats(file.type);
+        this.convertBtn.disabled = true;
+        this.selectedFormat = null;
     }
 
-    updateOutputFormats(inputType) {
-        this.formatButtons.innerHTML = '';
-        this.selectedFormat = null;
-        this.convertBtn.disabled = true;
+    updateAvailableFormats(inputType) {
+        const availableFormats = this.supportedConversions[inputType] || [];
+        const buttons = this.formatButtons.querySelectorAll('.format-button');
         
-        if (this.supportedConversions[inputType]) {
-            this.supportedConversions[inputType].forEach(format => {
-                const button = document.createElement('button');
-                button.className = 'format-button';
-                button.textContent = format.split('/')[1].toUpperCase();
-                button.dataset.format = format;
-                
-                button.addEventListener('click', () => {
-                    this.formatButtons.querySelectorAll('.format-button').forEach(btn => {
-                        btn.classList.remove('selected');
-                    });
-                    
-                    button.classList.add('selected');
-                    this.selectedFormat = format;
-                    this.convertBtn.disabled = false;
+        // First, get initial positions of all buttons
+        const initialPositions = Array.from(buttons).map(button => {
+            const rect = button.getBoundingClientRect();
+            return { button, rect };
+        });
+
+        // Mark buttons as available/unavailable without changing positions yet
+        buttons.forEach(button => {
+            const format = button.dataset.format;
+            if (availableFormats.includes(format)) {
+                button.classList.remove('unavailable');
+                button.classList.add('available');
+            } else {
+                button.classList.remove('available');
+                button.classList.add('unavailable');
+            }
+        });
+
+        // Force a reflow to get new positions
+        this.formatButtons.offsetHeight;
+
+        // Animate all buttons
+        initialPositions.forEach(({ button, rect }) => {
+            const format = button.dataset.format;
+            const newRect = button.getBoundingClientRect();
+            
+            if (availableFormats.includes(format)) {
+                // Reset button to its initial position
+                gsap.set(button, {
+                    x: rect.left - newRect.left,
+                    y: rect.top - newRect.top,
+                    opacity: 1,
+                    scale: 1,
+                    rotation: 0
                 });
-                
-                this.formatButtons.appendChild(button);
-            });
-        }
+
+                // Animate to new position
+                gsap.to(button, {
+                    x: 0,
+                    y: 0,
+                    scale: 1,
+                    rotation: 0,
+                    duration: 0.8,
+                    ease: "elastic.out(1, 0.7)",
+                    clearProps: "all"
+                });
+            } else {
+                // Fly away animation
+                gsap.to(button, {
+                    opacity: 0,
+                    scale: 0.5,
+                    rotation: (Math.random() - 0.5) * 180,
+                    x: (Math.random() - 0.5) * 400,
+                    y: (Math.random() - 0.5) * 400,
+                    duration: 0.8,
+                    ease: "power2.inOut",
+                    onComplete: () => {
+                        button.style.visibility = 'hidden';
+                        button.style.position = 'absolute';
+                    }
+                });
+            }
+        });
     }
 
     async convertFile() {
@@ -215,6 +267,53 @@ class Polymorph {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+    createAllFormatButtons() {
+        this.formatButtons.innerHTML = '';
+        
+        const wrapper = document.createElement('div');
+        
+        Array.from(this.allFormats).sort().forEach(format => {
+            const button = this.createFormatButton(format);
+            wrapper.appendChild(button);
+        });
+        
+        this.formatButtons.appendChild(wrapper);
+
+        // Improved initial animation
+        gsap.from('.format-button', {
+            opacity: 0,
+            scale: 0,
+            duration: 0.5,
+            stagger: {
+                amount: 1,
+                from: "random",
+                grid: "auto"
+            },
+            ease: "elastic.out(1, 0.7)",
+            clearProps: "transform"
+        });
+    }
+
+    createFormatButton(format) {
+        const button = document.createElement('button');
+        button.className = 'format-button';
+        button.textContent = format.split('/')[1].toUpperCase();
+        button.dataset.format = format;
+        
+        button.addEventListener('click', () => {
+            if (!button.classList.contains('unavailable')) {
+                this.formatButtons.querySelectorAll('.format-button').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                button.classList.add('selected');
+                this.selectedFormat = format;
+                this.convertBtn.disabled = false;
+            }
+        });
+        
+        return button;
     }
 }
 

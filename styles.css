@@ -264,6 +264,13 @@ button:disabled {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 1rem;
     margin: 1rem 0;
+    min-height: 200px;
+    position: relative;
+    width: 100%;
+}
+
+.format-buttons > div {
+    display: contents !important;
 }
 
 .format-button {
@@ -271,14 +278,24 @@ button:disabled {
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    padding: 1rem;
+    padding: 0.75rem;
     cursor: pointer;
-    transition: all 0.3s ease;
     text-align: center;
     font-size: 0.9rem;
+    position: relative;
+    transform-origin: center center;
+    will-change: transform, opacity;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    margin: 0;
+    box-sizing: border-box;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
-.format-button:hover {
+.format-button:hover:not(.unavailable) {
     border-color: var(--primary-color);
     color: var(--primary-color);
     transform: translateY(-2px);
@@ -289,6 +306,14 @@ button:disabled {
     background: var(--primary-color);
     color: var(--bg-color);
     border-color: var(--primary-color);
+}
+
+.format-button.unavailable {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    pointer-events: none;
+    height: 45px;
 }
 
 .conversion-options {
