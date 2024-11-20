@@ -107,12 +107,6 @@ h1 {
     margin-bottom: 2rem;
 }
 
-.upload-text {
-    color: var(--text-secondary);
-    margin: 1rem 0;
-    font-size: 0.9rem;
-}
-
 .drag-icon {
     font-size: 3rem;
     color: var(--primary-color);
