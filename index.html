@@ -6,6 +6,8 @@
     <title>Polymorph - Offline File Converter</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
 </head>
 <body>
     <div class="container">
@@ -29,6 +31,19 @@
         </div>
 
         <div id="status" class="status"></div>
+        <div id="loadingLibraries" class="status">Loading conversion libraries...</div>
+        <div class="supported-formats">
+            <details>
+                <summary>Supported File Types</summary>
+                <ul>
+                    <li>Images: JPG, PNG, WebP, GIF</li>
+                    <li>Documents: PDF, DOCX, TXT</li>
+                    <li>Spreadsheets: XLSX, CSV, JSON</li>
+                    <li>Text: HTML, Markdown, Plain Text</li>
+                    <li>Audio: MP3, WAV, OGG</li>
+                </ul>
+            </details>
+        </div>
     </div>
     <script src="converter.js"></script>
 </body>

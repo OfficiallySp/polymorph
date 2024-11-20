@@ -71,9 +71,11 @@ select, button {
     width: 100%;
     padding: 0.8rem;
     margin: 0.5rem 0;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     font-size: 1rem;
+    background: var(--card-bg);
+    color: var(--text-color);
 }
 
 button {
@@ -96,5 +98,30 @@ button:disabled {
 .status {
     text-align: center;
     margin-top: 1rem;
-    color: #666;
+    color: var(--text-secondary);
+}
+
+.supported-formats {
+    margin-top: 2rem;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.supported-formats summary {
+    cursor: pointer;
+    color: var(--primary-color);
+}
+
+.supported-formats ul {
+    margin-top: 1rem;
+    color: var(--text-secondary);
+}
+
+#loadingLibraries {
+    color: var(--primary-color);
+}
+
+details {
+    user-select: none;
 } 
