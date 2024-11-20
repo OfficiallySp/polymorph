@@ -6,6 +6,7 @@ class Polymorph {
         this.convertBtn = document.getElementById('convertBtn');
         this.status = document.getElementById('status');
         this.selectedFormat = null;
+        this.loadingText = document.getElementById('loadingLibraries');
         
         this.supportedConversions = {
             'image/jpeg': ['image/png', 'image/webp', 'image/gif'],
@@ -139,12 +140,26 @@ class Polymorph {
     }
 
     async loadLibraries() {
-        await Promise.all([
-            this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js'),
-            this.loadScript('https://unpkg.com/docx@7.1.0/build/index.js'),
-            this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js'),
-            this.loadScript('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js')
-        ]);
+        try {
+            await Promise.all([
+                this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js'),
+                this.loadScript('https://unpkg.com/docx@7.1.0/build/index.js'),
+                this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js'),
+                this.loadScript('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js')
+            ]);
+            
+            // Fade out and remove the loading text
+            gsap.to(this.loadingText, {
+                opacity: 0,
+                duration: 0.5,
+                onComplete: () => {
+                    this.loadingText.style.display = 'none';
+                }
+            });
+        } catch (error) {
+            this.loadingText.textContent = 'Error loading some conversion engines. Some features may be limited.';
+            console.error('Error loading libraries:', error);
+        }
     }
 
     loadScript(src) {
