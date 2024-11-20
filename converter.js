@@ -5,9 +5,6 @@ class Polymorph {
         this.outputFormat = document.getElementById('outputFormat');
         this.convertBtn = document.getElementById('convertBtn');
         this.status = document.getElementById('status');
-        this.loadingMessage = document.getElementById('loadingLibraries');
-        
-        this.engineLoaded = false;
         
         this.supportedConversions = {
             'image/jpeg': ['image/png', 'image/webp', 'image/gif'],
@@ -26,20 +23,8 @@ class Polymorph {
             'audio/ogg': ['audio/mpeg', 'audio/wav']
         };
 
-        this.outputFormat.removeEventListener('change', this.handleFormatChange);
-        this.outputFormat.addEventListener('change', this.handleFormatChange.bind(this));
-
         this.initializeEventListeners();
-        this.loadLibraries().then(() => {
-            this.engineLoaded = true;
-            this.loadingMessage.textContent = 'All engines loaded! Ready to transform files.';
-            setTimeout(() => {
-                this.loadingMessage.style.display = 'none';
-            }, 1000);
-        }).catch(error => {
-            this.loadingMessage.textContent = 'Error loading libraries. Please refresh the page.';
-            console.error('Error loading libraries:', error);
-        });
+        this.loadLibraries();
     }
 
     initializeEventListeners() {
@@ -52,22 +37,8 @@ class Polymorph {
         if (!file) return;
 
         this.fileName.textContent = file.name;
-        const mimeType = this.getMimeType(file);
-        
-        if (!this.supportedConversions[mimeType]) {
-            this.status.textContent = `Unsupported file type: ${mimeType}`;
-            this.outputFormat.disabled = true;
-            this.convertBtn.disabled = true;
-            return;
-        }
-
-        this.updateOutputFormats(mimeType);
+        this.updateOutputFormats(file.type);
         this.outputFormat.disabled = false;
-        this.status.textContent = '';
-    }
-
-    handleFormatChange() {
-        this.convertBtn.disabled = !this.outputFormat.value;
     }
 
     updateOutputFormats(inputType) {
@@ -81,69 +52,44 @@ class Polymorph {
                 this.outputFormat.appendChild(option);
             });
         }
+
+        this.outputFormat.addEventListener('change', () => {
+            this.convertBtn.disabled = !this.outputFormat.value;
+        });
     }
 
     async convertFile() {
-        if (!this.engineLoaded) {
-            this.status.textContent = 'Please wait for engines to load...';
-            return;
-        }
-
         const file = this.inputFile.files[0];
         const outputFormat = this.outputFormat.value;
 
-        if (!file || !outputFormat) {
-            this.status.textContent = 'Please select both input file and output format';
-            return;
-        }
+        if (!file || !outputFormat) return;
 
         this.status.textContent = 'Converting...';
-        this.convertBtn.disabled = true;
         
         try {
             const result = await this.performConversion(file, outputFormat);
             this.downloadResult(result, outputFormat);
             this.status.textContent = 'Conversion complete!';
         } catch (error) {
-            console.error('Conversion error:', error);
             this.status.textContent = `Error: ${error.message}`;
-        } finally {
-            this.convertBtn.disabled = false;
         }
     }
 
     async loadLibraries() {
-        try {
-            this.loadingMessage.textContent = 'Loading PDF engine...';
-            await this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js');
-            
-            this.loadingMessage.textContent = 'Loading document engine...';
-            await this.loadScript('https://unpkg.com/docx@7.1.0/build/index.js');
-            
-            this.loadingMessage.textContent = 'Loading spreadsheet engine...';
-            await this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js');
-            
-            this.loadingMessage.textContent = 'Loading audio engine...';
-            await this.loadScript('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js');
-            
-            this.loadingMessage.textContent = 'All engines loaded!';
-            setTimeout(() => {
-                this.loadingMessage.style.display = 'none';
-            }, 1000);
-        } catch (error) {
-            throw new Error('Failed to load conversion engines: ' + error.message);
-        }
+        await Promise.all([
+            this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js'),
+            this.loadScript('https://unpkg.com/docx@7.1.0/build/index.js'),
+            this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js'),
+            this.loadScript('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js')
+        ]);
     }
 
     loadScript(src) {
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.src = src;
-            script.onload = () => {
-                console.log(`Loaded: ${src}`);
-                resolve();
-            };
-            script.onerror = () => reject(new Error(`Failed to load ${src}`));
+            script.onload = resolve;
+            script.onerror = reject;
             document.head.appendChild(script);
         });
     }
@@ -258,30 +204,6 @@ class Polymorph {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-    }
-
-    getMimeType(file) {
-        // Common file extensions to MIME types mapping
-        const mimeTypes = {
-            'jpg': 'image/jpeg',
-            'jpeg': 'image/jpeg',
-            'png': 'image/png',
-            'gif': 'image/gif',
-            'webp': 'image/webp',
-            'pdf': 'application/pdf',
-            'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'csv': 'text/csv',
-            'txt': 'text/plain',
-            'html': 'text/html',
-            'md': 'text/markdown',
-            'mp3': 'audio/mpeg',
-            'wav': 'audio/wav',
-            'ogg': 'audio/ogg'
-        };
-
-        const extension = file.name.split('.').pop().toLowerCase();
-        return file.type || mimeTypes[extension] || 'application/octet-stream';
     }
 }
 
