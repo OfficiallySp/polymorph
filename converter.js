@@ -2,9 +2,10 @@ class Polymorph {
     constructor() {
         this.inputFile = document.getElementById('inputFile');
         this.fileName = document.getElementById('fileName');
-        this.outputFormat = document.getElementById('outputFormat');
+        this.formatButtons = document.getElementById('formatButtons');
         this.convertBtn = document.getElementById('convertBtn');
         this.status = document.getElementById('status');
+        this.selectedFormat = null;
         
         this.supportedConversions = {
             'image/jpeg': ['image/png', 'image/webp', 'image/gif'],
@@ -38,29 +39,39 @@ class Polymorph {
 
         this.fileName.textContent = file.name;
         this.updateOutputFormats(file.type);
-        this.outputFormat.disabled = false;
+        this.formatButtons.disabled = false;
     }
 
     updateOutputFormats(inputType) {
-        this.outputFormat.innerHTML = '<option value="">Select output format...</option>';
+        this.formatButtons.innerHTML = '';
+        this.selectedFormat = null;
+        this.convertBtn.disabled = true;
         
         if (this.supportedConversions[inputType]) {
             this.supportedConversions[inputType].forEach(format => {
-                const option = document.createElement('option');
-                option.value = format;
-                option.textContent = format.split('/')[1].toUpperCase();
-                this.outputFormat.appendChild(option);
+                const button = document.createElement('button');
+                button.className = 'format-button';
+                button.textContent = format.split('/')[1].toUpperCase();
+                button.dataset.format = format;
+                
+                button.addEventListener('click', () => {
+                    this.formatButtons.querySelectorAll('.format-button').forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+                    
+                    button.classList.add('selected');
+                    this.selectedFormat = format;
+                    this.convertBtn.disabled = false;
+                });
+                
+                this.formatButtons.appendChild(button);
             });
         }
-
-        this.outputFormat.addEventListener('change', () => {
-            this.convertBtn.disabled = !this.outputFormat.value;
-        });
     }
 
     async convertFile() {
         const file = this.inputFile.files[0];
-        const outputFormat = this.outputFormat.value;
+        const outputFormat = this.selectedFormat;
 
         if (!file || !outputFormat) return;
 
